@@ -10,8 +10,14 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
 // User Controller 
 app.use('/users',controllers.User);
-// Bugs Controller 
+// Bug Controller 
 app.use('/bugs',controllers.Bug);
+// BugVH Controller 
+app.use('/bugVH',controllers.BugVH);
+// Test Controller 
+app.use('/tests',controllers.Test);
+// Comment Controller 
+app.use('/comments', controllers.Comment);
 // Home route for testing our app
 app.get("/", (req, res) => {
     res.send("Hello World");
