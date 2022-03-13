@@ -6,7 +6,7 @@ const User = require('../models/userModel');
 router.get('/:query', async (req, res)=> {
     try {
         const userQued = await User.findById(req.params.query);
-        console.log ('A user was just created with the following attributes :',userQued);
+        console.log ('A user was fetched with the following attributes :',userQued);
         res.json(userQued);
     }
     catch (error) {
