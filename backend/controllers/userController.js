@@ -25,7 +25,7 @@ router.post('/create', async (req,res)=> {
         res.status(400).json(error);
     }
 });
-router.put('/:id/update', (req,res)=> {
+router.put('/:id/update', async (req,res)=> {
     try {
         const userWarped = await User.findByIdAndUpdate(req.params.id,req.body);
         console.log('A user has been updated with the following attributes : ',userWarped);
@@ -35,7 +35,7 @@ router.put('/:id/update', (req,res)=> {
         res.status(400).json(error);
     }
 });
-router.delete('/:id/delete', (req,res)=> {
+router.delete('/:id/delete', async (req,res)=> {
     try {
         const userDelted = await User.findByIdAndDelete(req.params.id);
         console.log ('A user has been deleted with the following attributes : ', userDelted);
@@ -45,3 +45,4 @@ router.delete('/:id/delete', (req,res)=> {
         res.status(400).json(error);
     }
 });
+module.exports = router;
