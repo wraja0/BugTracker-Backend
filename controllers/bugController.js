@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Bug = require('../models/allBugsModel');
 
-// QuerybyUserID handler
+// QuerybyBugID handler
 router.get('/:query', async (req, res)=> {
     try {
         const bugQued = await Bug.findById(req.params.query);
