@@ -19,7 +19,7 @@ function authenticateToken(req, res, next) {
 }
 
 // Authentication Middleware Call
-// router.use(authenticateToken)
+router.use(authenticateToken)
 
 // QuerybyUserID handler
 router.get('/', async (req,res, next)=> {
