@@ -22,7 +22,7 @@ const auth = ( async(req,res,next)=> {
 });
 
 // QuerybyUserID handler
-router.get('/',auth, async (req,res, next)=> {
+router.get('/', async (req,res, next)=> {
     try {
         const allUsers = await User.find({});
         console.log(allUsers);
