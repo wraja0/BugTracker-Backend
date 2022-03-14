@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     class: {type: String},
     emai: {type: String},
     password: {type: String},
@@ -12,5 +12,5 @@ const UserSchema = new mongoose.Schema({
     dateCreated: {type: Date},
     dateLastEdited: {type:Date}
 }, {timestamps:true})
-const User = mongoose.model('User', UserSchema)
+const User = mongoose.model('User', userSchema)
 module.exports = User

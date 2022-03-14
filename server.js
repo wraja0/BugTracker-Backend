@@ -1,6 +1,7 @@
 // Import Dependencies
 const express = require("express");
 const cors = require("cors");
+const db = require('./models')
 const controllers = require('./controllers')
  // Create our app object
 const app = express();

@@ -22,14 +22,16 @@ function authenticateToken(req, res, next) {
 // router.use(authenticateToken)
 
 // QuerybyUserID handler
-router.get('/', async (req,res)=> {
+router.get('/', async (req,res, next)=> {
     try {
         const allUsers = await User.find({});
         console.log(allUsers);
         res.json(allUsers)
+        next();
     }
     catch(error) {
         res.status(400).json(error);
+        next();
     }
 })
 
