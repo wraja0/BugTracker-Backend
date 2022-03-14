@@ -10,14 +10,14 @@ const auth = ( async(req,res,next)=> {
     const key = process.env.USERFRONT_PUBLIC_KEY
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
-    if (!token) return res.Status(401).json({message: "Bad token"}); // Return 401 if no token
+    if (!token) return res.Status(200).json({message: "Bad token"}); // Return 401 if no token
         try {
             const auth = await jwt.verify(token, key)
             req.auth=auth
             next();
         }   
         catch(error) {
-            return res.Status(401).json({message: "Bad token"}); // Return 401 if no token
+            return res.Status(200).json({message: "Bad token"}); // Return 401 if no token
         }
 });
 
