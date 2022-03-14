@@ -24,7 +24,7 @@ function authenticateToken(req, res, next) {
 // QuerybyUserID handler
 router.get('/', async (req,res)=> {
     try {
-        const allUsers = await User.findById({});
+        const allUsers = await User.find({});
         console.log(allUsers);
         res.json(allUsers)
     }
