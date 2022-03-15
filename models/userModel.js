@@ -3,6 +3,7 @@ const userSchema = new mongoose.Schema({
     class: {type: String},
     emai: {type: String},
     password: {type: String},
+    username: {type: String},
     bugsQue: [{type: mongoose.Types.ObjectId, ref: "AllBugs"}],
     bugsRemoved: [{type: mongoose.Types.ObjectId, ref: "AllBugs"}],
     bugsEdited: [{type: mongoose.Types.ObjectId, ref: "BugVH"}],
