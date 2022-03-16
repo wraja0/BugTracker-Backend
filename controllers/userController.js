@@ -8,19 +8,21 @@ const key = process.env.USERFRONT_PUBLIC_KEY
 // QuerybyUserID handler
 router.get('/', async (req,res, next)=> {
     try {
-        const userRequest = req.user
-        const foundUser = await User.findOne({
-            username: userRequest.username,
-            password: userRequest.password
-        });
-        if ((foundUser.username == userRequest.username) && (foundUser.password == userRequest.password)) {
-            res.json(foundUser);
+        if (req.user) {
+            const userRequest = req.user
+            const foundUser = await User.findOne({
+                username: userRequest.username,
+                password: userRequest.password
+            });
+            if ((foundUser.username == userRequest.username) && (foundUser.password == userRequest.password)) {
+                res.json(foundUser);
+            }
+            else {
+                res.status(400)
+                console.log('error hit')
+            }
+            next();
         }
-        else {
-            res.status(400)
-            console.log('error hit')
-        }
-        next();
     }
     catch(error) {
         res.status(400).json(error);
@@ -28,11 +30,20 @@ router.get('/', async (req,res, next)=> {
     }
 });
 
-router.get('/:query', async (req, res)=> {
+router.get('/devs', async (req, res)=> {
     try {
-        const userQued = await User.findById(req.params.query);
-        console.log ('A user was fetched with the following attributes :',userQued);
-        res.json(userQued);
+        if (req.user) {
+            const userRequest = req.user
+            const foundUser = await User.findOne({
+                username: userRequest.username,
+                password: userRequest.password
+            });
+            if ((foundUser.username == userRequest.username) && (foundUser.password == userRequest.password)) {
+                const allUsers = await User.find({class:"dev"});
+                console.log ('All users were fetched :',allUsers);
+                res.json(allUsers);
+            }
+        }
     }
     catch (error) {
         res.status(400).json(error);
@@ -42,10 +53,12 @@ router.get('/:query', async (req, res)=> {
 // Create User Handler 
 router.post('/create', async (req,res)=> {
     try {
-        const userRequest=req.user
-        const userCreated = await User.create(userRequest);
-        console.log('A user was just created with the following attributes : ',userCreated);
-        res.json(userCreated);
+        if (req.user) {
+            const userRequest=req.user
+            const userCreated = await User.create(userRequest);
+            console.log('A user was just created with the following attributes : ',userCreated);
+            res.json(userCreated);
+        }
     }
     catch(error) {
         res.status(400).json(error);

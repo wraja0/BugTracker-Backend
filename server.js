@@ -28,6 +28,7 @@ const authenticateToken = (req,res, next)=> {
 app.use('/user',authenticateToken)
 app.use('/user',controllers.User);
 // Bug Controller 
+app.use('/bugs',authenticateToken)
 app.use('/bugs',controllers.Bug);
 // BugVH Controller 
 app.use('/bugVH',controllers.BugVH);
