@@ -2,30 +2,44 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
 const jwt = require("jsonwebtoken");
+const bCrypt = require('bcrypt')
 require('dotenv').config();
 const key = process.env.USERFRONT_PUBLIC_KEY
 
-// QuerybyUserID handler
-router.get('/', async (req,res, next)=> {
+// 
+router.get('/login', async (req,res, next)=> {
     try {
         if (req.user) {
-            const userRequest = req.user
-            const foundUser = await User.findOne({
-                username: userRequest.username,
-                password: userRequest.password
-            });
-            if ((foundUser.username == userRequest.username) && (foundUser.password == userRequest.password)) {
-                res.json(foundUser);
+            console.log(req.user)
+            const foundUser = await User.findOne({username: req.user.username})
+            if (!foundUser) {
+                let error = {
+                    errortype: 'badusername',
+                    invalidLogin: true 
+                }
+                console.log(error)
+                res.json(error) 
             }
             else {
-                res.status(400)
-                console.log('error hit')
+                if (await bCrypt.compare(req.user.password,foundUser.password)){
+                    console.log('found user authorized sent')
+                    res.json(foundUser);
+                }
+                else {
+                    let error = {
+                        invalidLogin: true,
+                        errortype: 'badpassword'
+                    }
+                    console.log(error)
+                    res.json(error)
+                }
             }
-            next();
         }
+        next();
     }
     catch(error) {
-        res.status(400).json(error);
+        console.log(error)
+        res.status(200).json(error)
         next();
     }
 });
@@ -51,19 +65,19 @@ router.get('/devs', async (req, res)=> {
 });
 
 // Create User Handler 
-router.post('/create', async (req,res)=> {
+router.post('/register', async (req,res)=> {
     try {
         if (req.user) {
-            const userRequest=req.user
-            const userCreated = await User.create(userRequest);
+            const userCreated = await User.create(req.user);
             console.log('A user was just created with the following attributes : ',userCreated);
             res.json(userCreated);
         }
+        else return res.status(400).json('BAD TOKEN')
     }
     catch(error) {
         res.status(400).json(error);
     }
-});
+    });
 router.put('/:id/update', async (req,res)=> {
     try {
         const userWarped = await User.findByIdAndUpdate(req.params.id,req.body);

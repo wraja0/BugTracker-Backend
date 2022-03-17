@@ -1,10 +1,12 @@
-// Import Dependencies
+// Import Dependencie
 const express = require("express");
 const cors = require("cors");
 const jwt = require('jsonwebtoken')
+const bCrypt = require('bcrypt')
 require('dotenv').config();
 const db = require('./models')
-const controllers = require('./controllers')
+const controllers = require('./controllers');
+const { hash } = require("bcrypt");
  // Create our app object
 const app = express();
 // Set up middleware
@@ -14,6 +16,7 @@ app.use(express.urlencoded({ extended: false }));
 
 const authenticateToken = (req,res, next)=> {
     const authHeader = req.headers['authorization']
+    if (authHeader == null) return res.json('missing authorization header')
     const token = authHeader && authHeader.split(' ')[1]
     if (token == null) return res.sendStatus(401);
     jwt.verify(token, process.env.SECRET_KEY, (error, data)=> {
@@ -33,6 +36,7 @@ app.use('/bugs',controllers.Bug);
 // BugVH Controller 
 app.use('/bugVH',controllers.BugVH);
 // Test Controller 
+app.use('/tests',authenticateToken)
 app.use('/tests',controllers.Test);
 // Comment Controller 
 app.use('/comments', controllers.Comment);
@@ -41,8 +45,8 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 });
 // Auth 
-// Login
-app.post('/login', (req,res, next)=> {
+// LOGINTOKEN
+app.post('/generateLoginToken', (req,res, next)=> {
     const user = {
         username:req.body.username,
         password:req.body.password
@@ -51,16 +55,22 @@ app.post('/login', (req,res, next)=> {
     res.json({accessToken: accessToken})
     next();
 })
-// Register 
-app.post('/register', (req,res, next)=> {
+// REGISTERTOKEN
+app.post('/generateRegisterToken', async (req,res, next)=> {
+    try {
+         const hashedPassword = await bCrypt.hash(req.body.password,10)
     const user = {
         username:req.body.username,
-        password:req.body.password,
+        password: hashedPassword,
         class:req.body.class
     }
     const accessToken =jwt.sign(user,process.env.SECRET_KEY)
     res.json({accessToken: accessToken})
-    next();
+    next(); 
+    }
+    catch(error) {
+        res.json(error)
+    }
 })
 
 

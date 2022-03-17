@@ -1,14 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const Bug = require('../models/allBugsModel');
-const User = require('../models/userModel')
+const User = require('../models/userModel');
+const Test = require('../models/testsModel')
 
 // QuerybyBugID handler
-router.get('/:query', async (req, res)=> {
+router.post('/', async (req, res)=> {
     try {
-        const bugQued = await Bug.findById(req.params.query);
-        console.log ('A Bug was fetched with the following attributes :',bugQued);
-        res.json(bugQued);
+        if(req.user) {
+            const userAuth = req.user
+            const foundUser = await User.findOne({username:userAuth.username})
+            if ((userAuth.username == foundUser.username) && (userAuth.password == foundUser.password)) {
+                let bugQue = []
+                let testArr = []
+                for (i=0;i<req.body.ids.length;i++) {
+                    console.log(i)
+                    const bugQued = await Bug.findById(req.body.ids[i]);
+                    console.log(bugQued)
+                    bugQue.push(bugQued)
+                    let testIdArr = bugQued.tests
+                    let testArrmini = []
+                    for (j=0;j<testIdArr.length;j++) {
+                        const foundTest = await Test.findById(testIdArr[j])
+                        testArrmini.push(foundTest)
+                    }
+                    testArr.push(testArrmini)
+                }
+            console.log ('Bugs were fetched with the following attributes :',bugQue);
+            res.json({bugQue:bugQue,testArr:testArr});
+            }
+        }
+        else return res.status(401)
     }
     catch (error) {
         res.status(400).json(error);
@@ -21,8 +43,6 @@ router.post('/create', async (req,res)=> {
         if (req.user) {
             const userAuth = req.user
             const userRequest = req.body
-            console.log(userAuth)
-            console.log(userRequest)
             const foundAuthUser = await User.findOne({
                 username: userAuth.username,
                 password: userAuth.password
@@ -34,11 +54,19 @@ router.post('/create', async (req,res)=> {
                     managerAssigned: foundAuthUser._id,
                     devsAssigned: foundDev._id,
                 });
-                const devsUpdated = await User.findByIdAndUpdate(foundDev._id,{$addToSet:{bugsQue:bugCreated._id}})
-                const bugUpdated = await Bug.findByIdAndUpdate(bugCreated._id,{$addToSet: { assigned:foundDev._id }})
-                const managerUpdated = await User.findByIdAndUpdate(foundAuthUser._id,{$addToSet: {bugsQue:bugCreated._id}})
+                const testsCreated = await Test.create(userRequest.tests)
+                const testIdArrs = []
+                const devsUpdatedBugQue = await User.findByIdAndUpdate(foundDev._id,{$addToSet:{bugsQue:bugCreated._id}})
+                const bugUpdateAssigned = await Bug.findByIdAndUpdate(bugCreated._id,{$addToSet: { assigned:foundDev._id }})
+                const managerUpdatedBugQue = await User.findByIdAndUpdate(foundAuthUser._id,{$addToSet: {bugsQue:bugCreated._id}})
+                for (i=0; i<testsCreated.length; i++) {
+                    testIdArrs.push(testsCreated[i]._id)
+                    await User.findByIdAndUpdate(foundAuthUser._id, {$addToSet: {testsCreated: testIdArrs[i]}})
+                    await Bug.findByIdAndUpdate(bugCreated._id,{$addToSet: {tests: testIdArrs[i]}})
+                }
                 console.log('A Bug was just created with the following attributes : ',bugUpdated);
                 console.log('A User was just upated with the following attributes : ',devsUpdated);
+                console.log(`peep da set boi ${managerUpdatedTests}`)
                 res.json(req.body);
             }
         }
