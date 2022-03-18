@@ -4,39 +4,67 @@ const cors = require("cors");
 const jwt = require('jsonwebtoken')
 const bCrypt = require('bcrypt')
 require('dotenv').config();
-const db = require('./models')
+const { stringify } = require("nodemon/lib/utils");
+// IMPORT MODELS
+const db = require('./models/')
+// IMPORT ROUTERS
 const controllers = require('./controllers');
-const { hash } = require("bcrypt");
  // Create our app object
 const app = express();
 // Set up middleware
 app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
-
-const authenticateToken = (req,res, next)=> {
-    const authHeader = req.headers['authorization']
-    if (authHeader == null) return res.json('missing authorization header')
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return res.sendStatus(401);
-    jwt.verify(token, process.env.SECRET_KEY, (error, data)=> {
-        if(error) return res.sendStatus(403);
-        req.user = data
-        next(); 
-    })
-}
-
-// User Controller 
-// app.use(authenticateToken)
-app.use('/user',authenticateToken)
+// AUTHENTICATE LOGIN TOKEN AND STORE LOGIN INFO IN REQ.USER MIDDLEWARE 
+const authenticateLoginToken = (req,res, next)=> {
+    try {
+        const authHeader = req.headers['authorization']
+        if (authHeader == null) return res.json('missing authorization header')
+        const token = authHeader && authHeader.split(' ')[1]
+        if (token == null) return res.sendStatus(401);
+        jwt.verify(token, process.env.SECRET_LOGIN_KEY, async (error, userLoginData)=> {
+            if(error) return res.sendStatus(403);
+            const foundUser = await db.User.findOne({username: userLoginData.username})
+            if (!foundUser) {
+                let error = {
+                    errortype: 'badusername',
+                    invalidLogin: true 
+                }
+                console.log(error)
+                req.errors = error
+            }
+            else {
+                const parsedUserPassword = stringify(userLoginData.password)
+                if (await bCrypt.compare(parsedUserPassword,foundUser.password)){
+                    console.log('found user authorized sent')
+                    req.user= foundUser;
+                    req.user.password = '********'
+                    next();
+                }
+                else {
+                    let error = {
+                        invalidLogin: true,
+                        errortype: 'badpassword'
+                    }
+                    console.log(error)
+                    req.errors = error
+                }
+            }
+        })
+    }
+    catch(error) {
+        res.status(400).json(error)
+    }
+}           
+app.use('/user',authenticateLoginToken)
 app.use('/user',controllers.User);
 // Bug Controller 
-app.use('/bugs',authenticateToken)
+app.use('/bugs',authenticateLoginToken)
 app.use('/bugs',controllers.Bug);
 // BugVH Controller 
 app.use('/bugVH',controllers.BugVH);
 // Test Controller 
-app.use('/tests',authenticateToken)
+app.use('/tests',authenticateLoginToken)
 app.use('/tests',controllers.Test);
 // Comment Controller 
 app.use('/comments', controllers.Comment);
@@ -44,14 +72,14 @@ app.use('/comments', controllers.Comment);
 app.get("/", (req, res) => {
     res.send("Hello World");
 });
-// Auth 
+// TOKEN GENERATIONS
 // LOGINTOKEN
 app.post('/generateLoginToken', (req,res, next)=> {
     const user = {
         username:req.body.username,
         password:req.body.password
     }
-    const accessToken =jwt.sign(user,process.env.SECRET_KEY)
+    const accessToken =jwt.sign(user,process.env.SECRET_LOGIN_KEY)
     res.json({accessToken: accessToken})
     next();
 })
@@ -64,7 +92,7 @@ app.post('/generateRegisterToken', async (req,res, next)=> {
         password: hashedPassword,
         class:req.body.class
     }
-    const accessToken =jwt.sign(user,process.env.SECRET_KEY)
+    const accessToken =jwt.sign(user,process.env.SECRET_LOGIN_KEY)
     res.json({accessToken: accessToken})
     next(); 
     }

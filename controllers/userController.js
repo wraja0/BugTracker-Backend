@@ -6,57 +6,20 @@ const bCrypt = require('bcrypt')
 require('dotenv').config();
 const key = process.env.USERFRONT_PUBLIC_KEY
 
-// 
-router.get('/login', async (req,res, next)=> {
+// RESPOND WITH LOGGED IN USER 
+router.get('/login',(req,res, next)=> {
+    if (req.user) res.json(req.user)
+})
+// REPOND WITH ALL USERS HAVING THE CLASS OF 'DEV'
+router.get('/allDevs', async (req, res)=> {
     try {
-        if (req.user) {
-            console.log(req.user)
-            const foundUser = await User.findOne({username: req.user.username})
-            if (!foundUser) {
-                let error = {
-                    errortype: 'badusername',
-                    invalidLogin: true 
-                }
-                console.log(error)
-                res.json(error) 
-            }
-            else {
-                if (await bCrypt.compare(req.user.password,foundUser.password)){
-                    console.log('found user authorized sent')
-                    res.json(foundUser);
-                }
-                else {
-                    let error = {
-                        invalidLogin: true,
-                        errortype: 'badpassword'
-                    }
-                    console.log(error)
-                    res.json(error)
-                }
-            }
-        }
-        next();
-    }
-    catch(error) {
-        console.log(error)
-        res.status(200).json(error)
-        next();
-    }
-});
-
-router.get('/devs', async (req, res)=> {
-    try {
-        if (req.user) {
-            const userRequest = req.user
-            const foundUser = await User.findOne({
-                username: userRequest.username,
-                password: userRequest.password
-            });
-            if ((foundUser.username == userRequest.username) && (foundUser.password == userRequest.password)) {
+        if ((req.user) && (req.user.class==='manager')) {
                 const allUsers = await User.find({class:"dev"});
+                for (i=0; i<allUsers.length; i++) {
+                    allUsers[i].password = '********'
+                }
                 console.log ('All users were fetched :',allUsers);
                 res.json(allUsers);
-            }
         }
     }
     catch (error) {
@@ -98,4 +61,7 @@ router.delete('/:id/delete', async (req,res)=> {
         res.status(400).json(error);
     }
 });
+router.get('/jumbo', async(req,res,next)=> {
+    res.json(req.user)
+})
 module.exports = router;
