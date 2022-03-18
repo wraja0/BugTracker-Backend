@@ -86,7 +86,7 @@ app.post('/generateLoginToken', (req,res, next)=> {
 // REGISTERTOKEN
 app.post('/generateRegisterToken', async (req,res, next)=> {
     try {
-         const hashedPassword = await bCrypt.hash(req.body.password,10)
+    const hashedPassword = await bCrypt.hash(req.body.password,10)
     const user = {
         username:req.body.username,
         password: hashedPassword,
@@ -100,6 +100,27 @@ app.post('/generateRegisterToken', async (req,res, next)=> {
         res.json(error)
     }
 })
+app.post('/register', async (req,res)=> {
+    try {const authHeader = req.headers['authorization']
+    if (authHeader == null) return res.json('missing authorization header')
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(401);
+    jwt.verify(token, process.env.SECRET_LOGIN_KEY, async (error, newUserData)=> {
+        if (error) { 
+            console.log(error)
+            res.status(400).res.json(error)
+        }
+        else {
+            const userCreated = await db.User.create(newUserData);
+            console.log('A user was just created with the following attributes : ',userCreated);
+            res.json(userCreated);
+        }
+        })
+    }
+    catch(error) {
+        res.status(400).json(error);
+    }
+    });
 
 
 // declare a variable for our port number

@@ -6,32 +6,27 @@ const Test = require('../models/testsModel');
 const { findOne } = require('../models/userModel');
 
 // QuerybyBugID handler
-router.post('/', async (req, res)=> {
+router.get('/', async (req, res)=> {
     try {
-        if(req.user) {
-            const userAuth = req.user
-            const foundUser = await User.findOne({username:userAuth.username})
-            if ((userAuth.username == foundUser.username) && (userAuth.password == foundUser.password)) {
-                let bugQue = []
-                let testArr = []
-                for (i=0;i<req.body.ids.length;i++) {
-                    console.log(i)
-                    const bugQued = await Bug.findById(req.body.ids[i]);
-                    console.log(bugQued)
-                    bugQue.push(bugQued)
-                    let testIdArr = bugQued.tests
-                    let testArrmini = []
-                    for (j=0;j<testIdArr.length;j++) {
-                        const foundTest = await Test.findById(testIdArr[j])
-                        testArrmini.push(foundTest)
+        if (req.user) {
+            let bugsQue = req.user.bugsQue
+            let bugQueArr = []
+            let testArrMajor = []
+            for (i=0;i<bugsQue.length;i++) {
+                const bugQued = await Bug.findById(bugsQue[i]);
+                console.log(bugQued)
+                bugQueArr.push(bugQued)
+                let testIdArr = bugQued.tests
+                let testArrmini = []
+                for (j=0;j<testIdArr.length;j++) {
+                    const foundTest = await Test.findById(testIdArr[j])
+                    testArrmini.push(foundTest)
                     }
-                    testArr.push(testArrmini)
+                    testArrMajor.push(testArrmini)
                 }
-            console.log ('Bugs were fetched with the following attributes :',bugQue);
-            res.json({bugQue:bugQue,testArr:testArr});
-            }
+            console.log ('Bugs were fetched with the following attributes :',bugQueArr);
+            res.json({bugQue:bugQueArr,testArr:testArrMajor});
         }
-        else return res.status(401)
     }
     catch (error) {
         res.status(400).json(error);
@@ -64,8 +59,8 @@ router.post('/create', async (req,res)=> {
             console.log('A Bug was just created with the following attributes : ', bugCreated);
             console.log('A User was just upated with the following attributes : ',devsUpdatedBugQue);
             console.log('A User was just upated with the following attributes : ',managerUpdatedBugQue);
-            console.log('Tests were create with the following attributes')
-            res.json(req.body);    
+            console.log('Tests were create with the following attributes :', testsCreated)
+            res.json(req.body);
         }
     }
     catch(error) {

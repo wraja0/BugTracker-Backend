@@ -28,19 +28,6 @@ router.get('/allDevs', async (req, res)=> {
 });
 
 // Create User Handler 
-router.post('/register', async (req,res)=> {
-    try {
-        if (req.user) {
-            const userCreated = await User.create(req.user);
-            console.log('A user was just created with the following attributes : ',userCreated);
-            res.json(userCreated);
-        }
-        else return res.status(400).json('BAD TOKEN')
-    }
-    catch(error) {
-        res.status(400).json(error);
-    }
-    });
 router.put('/:id/update', async (req,res)=> {
     try {
         const userWarped = await User.findByIdAndUpdate(req.params.id,req.body);
