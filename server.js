@@ -17,11 +17,12 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
 // AUTHENTICATE LOGIN TOKEN AND STORE LOGIN INFO IN REQ.USER MIDDLEWARE 
 const authenticateLoginToken = (req,res, next)=> {
+
     try {
         const authHeader = req.headers['authorization']
         if (authHeader == null) return res.json('missing authorization header')
         const token = authHeader && authHeader.split(' ')[1]
-        if (token == null) return res.sendStatus(401);
+        if (token == null) return res.status(401).json('BAD TOKEN');
         jwt.verify(token, process.env.SECRET_LOGIN_KEY, async (error, userLoginData)=> {
             if(error) return res.sendStatus(403);
             const foundUser = await db.User.findOne({username: userLoginData.username})
@@ -32,6 +33,7 @@ const authenticateLoginToken = (req,res, next)=> {
                 }
                 console.log(error)
                 req.errors = error
+                res.status(403).json(req.erros)
             }
             else {
                 const parsedUserPassword = stringify(userLoginData.password)
@@ -48,6 +50,7 @@ const authenticateLoginToken = (req,res, next)=> {
                     }
                     console.log(error)
                     req.errors = error
+                    res.status(403).json(req.erros)
                 }
             }
         })

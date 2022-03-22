@@ -6,26 +6,23 @@ const Test = require('../models/testsModel');
 const { findOne } = require('../models/userModel');
 
 // QuerybyBugID handler
-router.get('/', async (req, res)=> {
+router.post('/', async (req, res)=> {
     try {
+            console.log(req.body)
         if (req.user) {
-            let bugsQue = req.user.bugsQue
-            let bugQueArr = []
-            let testArrMajor = []
-            for (i=0;i<bugsQue.length;i++) {
-                const bugQued = await Bug.findById(bugsQue[i]);
-                console.log(bugQued)
-                bugQueArr.push(bugQued)
-                let testIdArr = bugQued.tests
-                let testArrmini = []
-                for (j=0;j<testIdArr.length;j++) {
-                    const foundTest = await Test.findById(testIdArr[j])
-                    testArrmini.push(foundTest)
-                    }
-                    testArrMajor.push(testArrmini)
-                }
-            console.log ('Bugs were fetched with the following attributes :',bugQueArr);
-            res.json({bugQue:bugQueArr,testArr:testArrMajor});
+            const foundBug = await Bug.findById(req.body.id)
+            console.log(foundBug)
+            const testArr = foundBug.tests
+            console.log(testArr);
+            let foundTests = []
+            for (i=0;i< testArr.length;i++) {
+                const foundTest = await Test.findById(testArr[i])
+                foundTests.push(foundTest)
+            }
+            res.json({
+                bug: foundBug,
+                tests: foundTests
+            })
         }
     }
     catch (error) {

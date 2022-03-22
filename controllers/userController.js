@@ -9,6 +9,7 @@ const key = process.env.USERFRONT_PUBLIC_KEY
 // RESPOND WITH LOGGED IN USER 
 router.get('/login',(req,res, next)=> {
     if (req.user) res.json(req.user)
+    next();
 })
 // REPOND WITH ALL USERS HAVING THE CLASS OF 'DEV'
 router.get('/allDevs', async (req, res)=> {
@@ -30,25 +31,25 @@ router.get('/allDevs', async (req, res)=> {
 // Create User Handler 
 router.put('/:id/update', async (req,res)=> {
     try {
-        const userWarped = await User.findByIdAndUpdate(req.params.id,req.body);
-        console.log('A user has been updated with the following attributes : ',userWarped);
-        res.json(userWarped);
+        if (req.user) {
+            const userWarped = await User.findByIdAndUpdate(req.user._id,req.body);
+            console.log('A user has been updated with the following attributes : ',userWarped);
+            res.status(200);
+        }
     }
     catch(error) {
         res.status(400).json(error);
     }
 });
 router.delete('/:id/delete', async (req,res)=> {
-    try {
-        const userDelted = await User.findByIdAndDelete(req.params.id);
-        console.log ('A user has been deleted with the following attributes : ', userDelted);
-        res.json(userDelted);
+    try {if (req.user) {
+            const userDelted = await User.findByIdAndDelete(req.user._Id);
+            console.log ('A user has been deleted with the following attributes : ', userDelted);
+            res.status(200)
+        }
     }
     catch(error) {
         res.status(400).json(error);
     }
 });
-router.get('/jumbo', async(req,res,next)=> {
-    res.json(req.user)
-})
 module.exports = router;

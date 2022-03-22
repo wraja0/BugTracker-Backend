@@ -4,6 +4,28 @@ const Test = require('../models/testsModel');
 const User = require('../models/userModel')
 
 // QuerybyTestID handler
+router.post('/manyTests', async(req,res,next)=> {
+    try {
+        console.log(req.user)
+        if (req.user) {
+            console.log(req.body)
+            let testArr = req.body.tests
+            let allTests = []
+            for(i=0;i <testArr.length;i++) {
+                foundTest = await Test.findById(testArr[i]._id)
+                console.log(`A test was fetched ${foundTest}`);
+                allTests.push(foundTest)
+            }
+            res.json(allTests)
+        }
+        else {
+            res.status(403).json('BAD TOKEN')
+        }
+    }
+    catch(error) {
+        res.status(400).json(error)
+    }
+})
 router.get('/:query', async (req, res)=> {
     try {
         const testQued = await Test.findById(req.body.test);
@@ -29,15 +51,10 @@ router.post('/create', async (req,res)=> {
 router.put('/update', async (req,res)=> {
     try {
         if (req.user) {
-            userAuth = req.user
-            const foundUser = await User.findOne({username: userAuth.username})
-            console.log(foundUser)
             console.log(req.body)
-            if ((foundUser.username == userAuth.username) && (foundUser.password == userAuth.password)) {
-                updatedTest = await Test.findByIdAndUpdate(req.body.id, {body: req.body.test})
-                console.log(updatedTest)
-                res.json(updatedTest)
-            }
+            updatedTest = await Test.findByIdAndUpdate(req.body.id, {body: req.body.newData})
+            console.log(`$A test was updated : ${updatedTest}`)
+            res.json(updatedTest.body)
         }
         else res.status(401)
     }
