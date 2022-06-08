@@ -1,10 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
-const jwt = require("jsonwebtoken");
-const bCrypt = require('bcrypt')
-require('dotenv').config();
-const key = process.env.USERFRONT_PUBLIC_KEY
+
 
 // RESPOND WITH LOGGED IN USER 
 router.get('/login',(req,res, next)=> {

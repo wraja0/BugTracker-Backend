@@ -11,13 +11,13 @@ router.post('/', async (req, res)=> {
             console.log(req.body)
         if (req.user) {
             const foundBug = await Bug.findById(req.body.id)
-            console.log(foundBug)
+            console.log(`A bug was fetched : ${foundBug}`)
             const testArr = foundBug.tests
-            console.log(testArr);
             let foundTests = []
             for (i=0;i< testArr.length;i++) {
                 const foundTest = await Test.findById(testArr[i])
                 foundTests.push(foundTest)
+                console.log(`tests were fetched from bug id ${req.body.id} : ${foundTest}`)
             }
             res.json({
                 bug: foundBug,

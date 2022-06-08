@@ -38,7 +38,7 @@ const authenticateLoginToken = (req,res, next)=> {
             else {
                 const parsedUserPassword = stringify(userLoginData.password)
                 if (await bCrypt.compare(parsedUserPassword,foundUser.password)){
-                    console.log('found user authorized sent')
+                    console.log('found user from json token')
                     req.user= foundUser;
                     req.user.password = '********'
                     next();
