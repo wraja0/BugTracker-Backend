@@ -50,7 +50,7 @@ const authenticateLoginToken = (req,res, next)=> {
                     }
                     console.log(error)
                     req.errors = error
-                    res.status(403).json(req.erros)
+                    res.status(403).json(error)
                 }
             }
         })
@@ -116,7 +116,8 @@ app.post('/register', async (req,res)=> {
         else {
             const userCreated = await db.User.create(newUserData);
             console.log('A user was just created with the following attributes : ',userCreated);
-            res.json(userCreated);
+            const redirect = {redirect:true}
+            res.json(redirect);
         }
         })
     }
